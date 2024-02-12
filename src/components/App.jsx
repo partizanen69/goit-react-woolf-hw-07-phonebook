@@ -51,8 +51,9 @@ export class App extends Component {
   };
 
   render() {
+    const filterLower = this.state.filter.toLocaleLowerCase();
     const filteredContacts = this.state.contacts.filter(c =>
-      c.name.toLowerCase().includes(this.state.filter)
+      c.name.toLowerCase().includes(filterLower)
     );
 
     return (
@@ -65,7 +66,7 @@ export class App extends Component {
             value={this.state.filter}
             handleChange={this.handleFilterChange}
           />
-          {filteredContacts.length && (
+          {filteredContacts.length > 0 && (
             <ContactList
               contacts={filteredContacts}
               deleteContact={this.deleteContact}
