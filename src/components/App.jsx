@@ -5,17 +5,30 @@ import { AppStyled } from './App.styled';
 import { ContactList } from './ContactList/ContactList';
 import { Filter } from './Filter/Filter';
 
+const initialContacts = [
+  { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+  { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+  { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+  { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+];
+const CONTACTS_LOCAL_STORAGE_KEY = 'contacts';
+
 export class App extends Component {
   state = {
-    // contacts: [],
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
+    contacts: [],
     filter: '',
   };
+
+  componentDidMount() {
+    let contacts = localStorage.getItem(CONTACTS_LOCAL_STORAGE_KEY);
+
+    if (!contacts || contacts.length === 0) {
+      contacts = [...initialContacts];
+    } else {
+      contacts = JSON.parse(contacts);
+    }
+    this.setState({ contacts });
+  }
 
   addNewContact = ({ name, number, onSuccess }) => {
     const nameLower = name.toLowerCase();
@@ -33,17 +46,33 @@ export class App extends Component {
       number,
     };
 
-    this.setState(prevState => ({
-      contacts: [...prevState.contacts, newContact],
-    }));
+    this.setState(prevState => {
+      const newContacts = [...prevState.contacts, newContact];
+
+      localStorage.setItem(
+        CONTACTS_LOCAL_STORAGE_KEY,
+        JSON.stringify(newContacts)
+      );
+
+      return { contacts: newContacts };
+    });
 
     onSuccess();
   };
 
   deleteContact = id => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(c => c.id !== id),
-    }));
+    this.setState(prevState => {
+      const newContacts = prevState.contacts.filter(c => c.id !== id);
+
+      localStorage.setItem(
+        CONTACTS_LOCAL_STORAGE_KEY,
+        JSON.stringify(newContacts)
+      );
+
+      return {
+        contacts: newContacts,
+      };
+    });
   };
 
   handleFilterChange = value => {
