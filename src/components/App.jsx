@@ -30,6 +30,20 @@ export class App extends Component {
     this.setState({ contacts });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const { contacts } = this.state;
+    if (contacts !== prevState.contacts) {
+      if (contacts.length > 0) {
+        localStorage.setItem(
+          CONTACTS_LOCAL_STORAGE_KEY,
+          JSON.stringify(contacts)
+        );
+      } else {
+        localStorage.removeItem(CONTACTS_LOCAL_STORAGE_KEY);
+      }
+    }
+  }
+
   addNewContact = ({ name, number, onSuccess }) => {
     const nameLower = name.toLowerCase();
     const idx = this.state.contacts.findIndex(
@@ -49,11 +63,6 @@ export class App extends Component {
     this.setState(prevState => {
       const newContacts = [...prevState.contacts, newContact];
 
-      localStorage.setItem(
-        CONTACTS_LOCAL_STORAGE_KEY,
-        JSON.stringify(newContacts)
-      );
-
       return { contacts: newContacts };
     });
 
@@ -63,12 +72,6 @@ export class App extends Component {
   deleteContact = id => {
     this.setState(prevState => {
       const newContacts = prevState.contacts.filter(c => c.id !== id);
-
-      localStorage.setItem(
-        CONTACTS_LOCAL_STORAGE_KEY,
-        JSON.stringify(newContacts)
-      );
-
       return {
         contacts: newContacts,
       };
