@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { AddContactForm } from './AddContactForm/AddContactForm';
 import { nanoid } from 'nanoid';
 import { AppStyled } from './App.styled';
@@ -13,13 +13,11 @@ const initialContacts = [
 ];
 const CONTACTS_LOCAL_STORAGE_KEY = 'contacts';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+export const App = () => {
+  const [contacts, setContacts] = useState(null);
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
+  useEffect(() => {
     let contacts = localStorage.getItem(CONTACTS_LOCAL_STORAGE_KEY);
 
     if (!contacts || contacts.length === 0) {
@@ -27,28 +25,27 @@ export class App extends Component {
     } else {
       contacts = JSON.parse(contacts);
     }
-    this.setState({ contacts });
-  }
+    setContacts(contacts);
+  }, []);
 
-  componentDidUpdate(prevProps, prevState) {
-    const { contacts } = this.state;
-    if (contacts !== prevState.contacts) {
-      if (contacts.length > 0) {
-        localStorage.setItem(
-          CONTACTS_LOCAL_STORAGE_KEY,
-          JSON.stringify(contacts)
-        );
-      } else {
-        localStorage.removeItem(CONTACTS_LOCAL_STORAGE_KEY);
-      }
+  useEffect(() => {
+    if (contacts === null) {
+      return;
     }
-  }
 
-  addNewContact = ({ name, number, onSuccess }) => {
+    if (contacts.length > 0) {
+      localStorage.setItem(
+        CONTACTS_LOCAL_STORAGE_KEY,
+        JSON.stringify(contacts)
+      );
+    } else {
+      localStorage.removeItem(CONTACTS_LOCAL_STORAGE_KEY);
+    }
+  }, [contacts]);
+
+  const addNewContact = ({ name, number, onSuccess }) => {
     const nameLower = name.toLowerCase();
-    const idx = this.state.contacts.findIndex(
-      c => c.name.toLowerCase() === nameLower
-    );
+    const idx = contacts.findIndex(c => c.name.toLowerCase() === nameLower);
     if (idx > -1) {
       alert(`${name} is already in contacts`);
       return;
@@ -60,52 +57,37 @@ export class App extends Component {
       number,
     };
 
-    this.setState(prevState => {
-      const newContacts = [...prevState.contacts, newContact];
-
-      return { contacts: newContacts };
-    });
+    setContacts([...contacts, newContact]);
 
     onSuccess();
   };
 
-  deleteContact = id => {
-    this.setState(prevState => {
-      const newContacts = prevState.contacts.filter(c => c.id !== id);
-      return {
-        contacts: newContacts,
-      };
-    });
+  const deleteContact = id => {
+    setContacts(contacts.filter(c => c.id !== id));
   };
 
-  handleFilterChange = value => {
-    this.setState({ filter: value });
+  const handleFilterChange = value => {
+    setFilter(value);
   };
 
-  render() {
-    const filterLower = this.state.filter.toLocaleLowerCase();
-    const filteredContacts = this.state.contacts.filter(c =>
-      c.name.toLowerCase().includes(filterLower)
-    );
+  const filterLower = filter.toLocaleLowerCase();
+  const filteredContacts =
+    contacts?.filter(c => c.name.toLowerCase().includes(filterLower)) ?? [];
 
-    return (
-      <AppStyled>
-        <div className="container">
-          <h2 className="chapter-name">Phonebook</h2>
-          <AddContactForm onSubmit={this.addNewContact} />
-          <h2 className="chapter-name">Contacts</h2>
-          <Filter
-            value={this.state.filter}
-            handleChange={this.handleFilterChange}
+  return (
+    <AppStyled>
+      <div className="container">
+        <h2 className="chapter-name">Phonebook</h2>
+        <AddContactForm onSubmit={addNewContact} />
+        <h2 className="chapter-name">Contacts</h2>
+        <Filter value={filter} handleChange={handleFilterChange} />
+        {filteredContacts.length > 0 && (
+          <ContactList
+            contacts={filteredContacts}
+            deleteContact={deleteContact}
           />
-          {filteredContacts.length > 0 && (
-            <ContactList
-              contacts={filteredContacts}
-              deleteContact={this.deleteContact}
-            />
-          )}
-        </div>
-      </AppStyled>
-    );
-  }
-}
+        )}
+      </div>
+    </AppStyled>
+  );
+};
