@@ -14,19 +14,13 @@ const initialContacts = [
 const CONTACTS_LOCAL_STORAGE_KEY = 'contacts';
 
 export const App = () => {
-  const [contacts, setContacts] = useState(null);
-  const [filter, setFilter] = useState('');
-
-  useEffect(() => {
+  const [contacts, setContacts] = useState(() => {
     let contacts = localStorage.getItem(CONTACTS_LOCAL_STORAGE_KEY);
-
-    if (!contacts || contacts.length === 0) {
-      contacts = [...initialContacts];
-    } else {
-      contacts = JSON.parse(contacts);
-    }
-    setContacts(contacts);
-  }, []);
+    return !contacts || contacts.length === 0
+      ? [...initialContacts]
+      : JSON.parse(contacts);
+  });
+  const [filter, setFilter] = useState('');
 
   useEffect(() => {
     if (contacts === null) {
