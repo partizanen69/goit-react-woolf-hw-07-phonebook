@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { nanoid } from 'nanoid';
 
 const defaultContacts = [
   { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
@@ -15,10 +14,10 @@ const contactsSlice = createSlice({
   },
   reducers: {
     addContact(state, action) {
-      const { name, number } = action.payload;
+      const { name, number, id } = action.payload;
 
       const newContact = {
-        id: nanoid(),
+        id,
         name,
         number,
       };
